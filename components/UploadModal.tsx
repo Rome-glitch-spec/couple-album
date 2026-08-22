@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
-import heic2any from 'heic2any';
 import { X, UploadCloud, Film, AlertCircle, CheckCircle2, RotateCcw } from 'lucide-react';
 import { uploadMedia } from '@/lib/media-service';
 import { validateFile, formatBytes, cn } from '@/lib/utils';
@@ -41,6 +40,7 @@ export default function UploadModal({
       const normalizedFiles = await Promise.all(Array.from(files).map(async (file) => {
         if (file.type !== 'image/heic' && file.type !== 'image/heif') return file;
 
+        const { default: heic2any } = await import('heic2any');
         const converted = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.92 });
         const blob = Array.isArray(converted) ? converted[0] : converted;
         return new File([blob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), {
