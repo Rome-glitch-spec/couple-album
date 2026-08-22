@@ -12,6 +12,7 @@
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
     "date-fns": "^4.4.0",
+    "heic-convert": "^2.1.0",
     "heic2any": "^0.0.4",
     "jszip": "^3.10.1",
     "lucide-react": "^1.33.0",
