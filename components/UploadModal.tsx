@@ -32,10 +32,13 @@ export default function UploadModal({
   const [favorite, setFavorite] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [preparing, setPreparing] = useState(false);
+  const [prepareError, setPrepareError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const addFiles = useCallback(async (files: FileList | File[]) => {
+    if (files.length === 0) return;
     setPreparing(true);
+    setPrepareError(null);
     try {
       const normalizedFiles = await Promise.all(Array.from(files).map(async (file) => {
         if (file.type !== 'image/heic' && file.type !== 'image/heif') return file;
@@ -56,6 +59,8 @@ export default function UploadModal({
         progress: 0,
       }));
       setQueue((q) => [...q, ...items]);
+    } catch (e) {
+      setPrepareError(e instanceof Error ? e.message : 'Could not prepare the selected files.');
     } finally {
       setPreparing(false);
     }
@@ -134,15 +139,21 @@ export default function UploadModal({
             )}
           >
             <UploadCloud className="h-7 w-7 mx-auto text-wine mb-2" />
-            <p className="text-sm text-ink">Drag photos or videos here</p>
+            <p className="text-sm text-ink">{preparing ? 'Preparing photos…' : 'Drag photos or videos here'}</p>
             <p className="text-xs text-ink-soft mt-1">or tap to choose from your device</p>
+            {prepareError && <p className="text-xs text-wine mt-2">{prepareError}</p>}
             <input
               ref={inputRef}
               type="file"
               multiple
               accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime,video/webm"
               className="hidden"
-              onChange={(e) => e.target.files && void addFiles(e.target.files)}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => {
+                const files = e.target.files ? Array.from(e.target.files) : [];
+                e.target.value = '';
+                void addFiles(files);
+              }}
             />
           </div>
 
@@ -225,7 +236,6 @@ export default function UploadModal({
           )}
         </div>
       </div>
-            <p className="text-sm text-ink">{preparing ? 'Preparing photos…' : 'Drag photos or videos here'}</p>
     </div>
   );
 }
