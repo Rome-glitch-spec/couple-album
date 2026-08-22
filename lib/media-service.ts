@@ -1,5 +1,6 @@
 'use client';
 
+import heic2any from 'heic2any';
 import { createClient } from '@/lib/supabase/client';
 import type { Media } from '@/types/database';
 import { validateFile } from '@/lib/utils';
@@ -117,6 +118,17 @@ export async function getSignedUrl(path: string, expiresIn = 3600): Promise<stri
   if (error || !data) throw new Error('Could not load this file.');
   urlCache.set(path, { url: data.signedUrl, expires: Date.now() + expiresIn * 1000 });
   return data.signedUrl;
+}
+
+export async function getDisplayUrl(path: string): Promise<string> {
+  const signedUrl = await getSignedUrl(path);
+  if (!/\.(heic|heif)(?:$|\?)/i.test(path)) return signedUrl;
+
+  const response = await fetch(signedUrl);
+  if (!response.ok) throw new Error('Could not load this file.');
+  const converted = await heic2any({ blob: await response.blob(), toType: 'image/jpeg', quality: 0.92 });
+  const blob = Array.isArray(converted) ? converted[0] : converted;
+  return URL.createObjectURL(blob);
 }
 
 export async function toggleFavorite(media: Media) {

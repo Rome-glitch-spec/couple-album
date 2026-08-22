@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import heic2any from 'heic2any';
-import { getSignedUrl } from '@/lib/media-service';
+import { getDisplayUrl } from '@/lib/media-service';
 import { cn } from '@/lib/utils';
 import { ImageOff } from 'lucide-react';
 
@@ -22,7 +21,6 @@ export default function SignedImage({
 
   useEffect(() => {
     let active = true;
-    let convertedUrl: string | null = null;
     if (!path) {
       setFailed(true);
       setSrc(null);
@@ -30,21 +28,11 @@ export default function SignedImage({
     }
     setFailed(false);
     setSrc(null);
-    getSignedUrl(path)
-      .then(async (url) => {
-        if (!/\.(heic|heif)(?:$|\?)/i.test(path)) return url;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Could not load this file.');
-        const converted = await heic2any({ blob: await response.blob(), toType: 'image/jpeg', quality: 0.92 });
-        const blob = Array.isArray(converted) ? converted[0] : converted;
-        convertedUrl = URL.createObjectURL(blob);
-        return convertedUrl;
-      })
+    getDisplayUrl(path)
       .then((url) => active && setSrc(url))
       .catch(() => active && setFailed(true));
     return () => {
       active = false;
-      if (convertedUrl) URL.revokeObjectURL(convertedUrl);
     };
   }, [path]);
 

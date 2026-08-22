@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { X, Play, Pause, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getSignedUrl } from '@/lib/media-service';
+import { getDisplayUrl } from '@/lib/media-service';
 import { formatDate } from '@/lib/utils';
 import type { Media } from '@/types/database';
 
@@ -21,7 +21,7 @@ export default function Slideshow({ items, title, onClose }: { items: Media[]; t
   useEffect(() => {
     if (!current) return;
     setUrl(null);
-    getSignedUrl(current.storage_path).then(setUrl).catch(() => setUrl(null));
+    getDisplayUrl(current.storage_path).then(setUrl).catch(() => setUrl(null));
   }, [current]);
 
   const next = useCallback(() => setIndex((i) => (i + 1) % items.length), [items.length]);

@@ -6,7 +6,7 @@ import {
   ZoomIn, ZoomOut, Maximize2, Archive, FolderPlus, Pencil,
 } from 'lucide-react';
 import type { Media } from '@/types/database';
-import { getSignedUrl, toggleFavorite, moveToTrash, setArchived, updateCaption } from '@/lib/media-service';
+import { getDisplayUrl, toggleFavorite, moveToTrash, setArchived, updateCaption } from '@/lib/media-service';
 import { formatDate, cn } from '@/lib/utils';
 
 export default function MediaViewer({
@@ -39,7 +39,7 @@ export default function MediaViewer({
     setPos({ x: 0, y: 0 });
     setCaptionDraft(media?.caption || '');
     setEditingCaption(false);
-    if (media) getSignedUrl(media.storage_path).then(setUrl).catch(() => setUrl(null));
+    if (media) getDisplayUrl(media.storage_path).then(setUrl).catch(() => setUrl(null));
   }, [media]);
 
   const close = useCallback(() => onClose(), [onClose]);
