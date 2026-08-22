@@ -205,6 +205,13 @@ export default function MediaViewer({
           <img
             src={url}
             alt={media.caption || media.file_name}
+            onError={async () => {
+              try {
+                setUrl(await getDisplayUrl(media.storage_path, true));
+              } catch {
+                setUrl(null);
+              }
+            }}
             className="max-h-full max-w-full object-contain cursor-grab active:cursor-grabbing"
             style={{ transform: `translate(${pos.x}px, ${pos.y}px) scale(${zoom})`, transition: dragRef.current.dragging ? 'none' : 'transform 0.15s ease-out' }}
             draggable={false}

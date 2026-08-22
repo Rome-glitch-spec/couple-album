@@ -120,9 +120,9 @@ export async function getSignedUrl(path: string, expiresIn = 3600): Promise<stri
   return data.signedUrl;
 }
 
-export async function getDisplayUrl(path: string): Promise<string> {
+export async function getDisplayUrl(path: string, forceConversion = false): Promise<string> {
   const signedUrl = await getSignedUrl(path);
-  if (!/\.(heic|heif)(?:$|\?)/i.test(path)) return signedUrl;
+  if (!forceConversion && !/\.(heic|heif)(?:$|\?)/i.test(path)) return signedUrl;
 
   const response = await fetch(signedUrl);
   if (!response.ok) throw new Error('Could not load this file.');

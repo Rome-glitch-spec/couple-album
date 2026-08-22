@@ -18,6 +18,7 @@ export default function SignedImage({
 }) {
   const [src, setSrc] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const [fallbackAttempted, setFallbackAttempted] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -27,6 +28,7 @@ export default function SignedImage({
       return;
     }
     setFailed(false);
+    setFallbackAttempted(false);
     setSrc(null);
     getDisplayUrl(path)
       .then((url) => active && setSrc(url))
@@ -49,5 +51,19 @@ export default function SignedImage({
   }
 
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt={alt} className={cn(className, imgClassName)} loading="lazy" />;
+  async function handleImageError() {
+    if (fallbackAttempted) {
+      setFailed(true);
+      return;
+    }
+    setFallbackAttempted(true);
+    try {
+      setSrc(await getDisplayUrl(path!, true));
+    } catch {
+      setFailed(true);
+    }
+  }
+
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={src} alt={alt} className={cn(className, imgClassName)} loading="lazy" onError={handleImageError} />;
 }
