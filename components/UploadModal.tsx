@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
-import { X, UploadCloud, ImageIcon, Film, AlertCircle, CheckCircle2, RotateCcw } from 'lucide-react';
+import heic2any from 'heic2any';
+import { X, UploadCloud, Film, AlertCircle, CheckCircle2, RotateCcw } from 'lucide-react';
 import { uploadMedia } from '@/lib/media-service';
 import { validateFile, formatBytes, cn } from '@/lib/utils';
 import type { Album, Collection, Media } from '@/types/database';
@@ -31,17 +32,33 @@ export default function UploadModal({
   const [collectionId, setCollectionId] = useState('');
   const [favorite, setFavorite] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [preparing, setPreparing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const addFiles = useCallback((files: FileList | File[]) => {
-    const items: QueueItem[] = Array.from(files).map((file) => ({
-      file,
-      previewUrl: URL.createObjectURL(file),
-      caption: '',
-      status: 'pending',
-      progress: 0,
-    }));
-    setQueue((q) => [...q, ...items]);
+  const addFiles = useCallback(async (files: FileList | File[]) => {
+    setPreparing(true);
+    try {
+      const normalizedFiles = await Promise.all(Array.from(files).map(async (file) => {
+        if (file.type !== 'image/heic' && file.type !== 'image/heif') return file;
+
+        const converted = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.92 });
+        const blob = Array.isArray(converted) ? converted[0] : converted;
+        return new File([blob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), {
+          type: 'image/jpeg',
+          lastModified: file.lastModified,
+        });
+      }));
+      const items: QueueItem[] = normalizedFiles.map((file) => ({
+        file,
+        previewUrl: URL.createObjectURL(file),
+        caption: '',
+        status: 'pending',
+        progress: 0,
+      }));
+      setQueue((q) => [...q, ...items]);
+    } finally {
+      setPreparing(false);
+    }
   }, []);
 
   function updateItem(idx: number, patch: Partial<QueueItem>) {
@@ -108,7 +125,7 @@ export default function UploadModal({
             onDrop={(e) => {
               e.preventDefault();
               setDragOver(false);
-              if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+              if (e.dataTransfer.files.length) void addFiles(e.dataTransfer.files);
             }}
             onClick={() => inputRef.current?.click()}
             className={cn(
@@ -125,7 +142,7 @@ export default function UploadModal({
               multiple
               accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime,video/webm"
               className="hidden"
-              onChange={(e) => e.target.files && addFiles(e.target.files)}
+              onChange={(e) => e.target.files && void addFiles(e.target.files)}
             />
           </div>
 
@@ -208,6 +225,7 @@ export default function UploadModal({
           )}
         </div>
       </div>
+            <p className="text-sm text-ink">{preparing ? 'Preparing photos…' : 'Drag photos or videos here'}</p>
     </div>
   );
 }
