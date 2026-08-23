@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   Home, GalleryVertical, FolderHeart, Layers, Heart, CalendarHeart,
   Archive, Trash2, Wand2, Settings, LogOut, HeartHandshake,
+  MessageCircle,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
@@ -17,6 +18,7 @@ const NAV = [
   { href: '/collections', label: 'Collections', icon: Layers },
   { href: '/favorites', label: 'Favorites', icon: Heart },
   { href: '/monthly', label: 'Monthly Memories', icon: CalendarHeart },
+  { href: '/chat', label: 'Chat', icon: MessageCircle },
   { href: '/archive', label: 'Archive', icon: Archive },
   { href: '/trash', label: 'Trash', icon: Trash2 },
   { href: '/collage', label: 'Collage Maker', icon: Wand2 },

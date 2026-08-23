@@ -80,6 +80,13 @@ export interface AppSettings {
   updated_at: string;
 }
 
+export interface ChatMessage {
+  id: string;
+  sender_id: string;
+  body: string;
+  created_at: string;
+}
+
 // Minimal Database generic shape so the Supabase client stays typed without
 // hand-maintaining the full generated schema. Extend via `supabase gen types`
 // for full type safety once the project is linked.
@@ -103,6 +110,7 @@ export interface Database {
       collages: { Row: Collage; Insert: Partial<Collage>; Update: Partial<Collage> };
       reminders: { Row: Reminder; Insert: Partial<Reminder>; Update: Partial<Reminder> };
       app_settings: { Row: AppSettings; Insert: Partial<AppSettings>; Update: Partial<AppSettings> };
+      chat_messages: { Row: ChatMessage; Insert: Partial<ChatMessage>; Update: Partial<ChatMessage> };
     };
   };
 }

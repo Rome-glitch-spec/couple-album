@@ -17,7 +17,7 @@ export default async function FavoritesPage() {
       <PageHeader title="Favorites" subtitle="Shared between the two of you — favorite from either side, see it here." />
       <div className="px-4 sm:px-8 py-6">
         {items && items.length > 0 ? (
-          <GalleryView initialItems={items} albums={albums ?? []} collections={collections ?? []} removeWhen={(m) => !m.is_favorite || m.is_deleted} />
+          <GalleryView initialItems={items} albums={albums ?? []} collections={collections ?? []} removeWhen="favorite" />
         ) : (
           <EmptyState icon={Heart} title="No favorites yet" subtitle="Save the moments you never want to forget." />
         )}

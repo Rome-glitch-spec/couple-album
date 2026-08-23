@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import PageHeader from '@/components/PageHeader';
 import { updateAppSettings, updateReminder, updateDisplayName, changePassword, requestBrowserNotificationPermission } from '@/lib/settings-service';
 import { formatBytes, cn } from '@/lib/utils';
-import { Check, Sun, Moon, Monitor } from 'lucide-react';
+import { Check, Sun, Moon, Monitor, Palette, ImagePlus, X } from 'lucide-react';
 import type { AppSettings, Reminder, Profile } from '@/types/database';
 
 export default function SettingsPage() {
@@ -20,6 +20,8 @@ export default function SettingsPage() {
   const [reminderEnabled, setReminderEnabled] = useState(true);
   const [browserNotif, setBrowserNotif] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
+  const [wallpaper, setWallpaper] = useState<'default' | 'linen' | 'petals' | 'plain'>('default');
+  const [wallpaperImage, setWallpaperImage] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [stats, setStats] = useState({ photos: 0, videos: 0, bytes: 0 });
   const [saved, setSaved] = useState<string | null>(null);
@@ -48,7 +50,22 @@ export default function SettingsPage() {
     })();
     const savedTheme = (localStorage.getItem('theme') as 'light' | 'dark' | 'system') || 'system';
     setTheme(savedTheme);
+    const savedWallpaper = (localStorage.getItem('wallpaper') as 'default' | 'linen' | 'petals' | 'plain') || 'default';
+    setWallpaper(savedWallpaper);
+    setWallpaperImage(localStorage.getItem('wallpaper-image') || '');
   }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.wallpaper = wallpaper;
+  }, [wallpaper]);
+
+  useEffect(() => {
+    if (wallpaperImage) {
+      document.documentElement.style.setProperty('--wallpaper-image', `url(${wallpaperImage})`);
+    } else {
+      document.documentElement.style.removeProperty('--wallpaper-image');
+    }
+  }, [wallpaperImage]);
 
   function flashSaved(label: string) {
     setSaved(label);
@@ -85,6 +102,31 @@ export default function SettingsPage() {
     localStorage.setItem('theme', next);
     const isDark = next === 'dark' || (next === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     document.documentElement.classList.toggle('dark', isDark);
+  }
+
+  function applyWallpaper(next: 'default' | 'linen' | 'petals' | 'plain') {
+    setWallpaper(next);
+    localStorage.setItem('wallpaper', next);
+  }
+
+  function applyWallpaperImage(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const image = typeof reader.result === 'string' ? reader.result : '';
+      if (!image) return;
+      try {
+        localStorage.setItem('wallpaper-image', image);
+        setWallpaperImage(image);
+      } catch {
+        alert('That picture is too large to use as a wallpaper. Please choose a smaller picture.');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearWallpaperImage() {
+    localStorage.removeItem('wallpaper-image');
+    setWallpaperImage('');
   }
 
   return (
@@ -154,6 +196,40 @@ export default function SettingsPage() {
                 <Icon className="h-4 w-4" /> {key}
               </button>
             ))}
+          </div>
+          <div className="flex items-center gap-2 text-xs text-ink-soft pt-2">
+            <Palette className="h-4 w-4" /> Wallpaper
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {(['default', 'linen', 'petals', 'plain'] as const).map((key) => (
+              <button
+                key={key}
+                onClick={() => applyWallpaper(key)}
+                className={cn('rounded-xl border py-2.5 text-xs capitalize', wallpaper === key ? 'border-wine text-wine bg-wine/5' : 'border-line text-ink-soft')}
+              >
+                {key}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2 pt-2">
+            <label className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-line py-2.5 text-xs text-ink-soft cursor-pointer hover:border-wine/40">
+              <ImagePlus className="h-4 w-4" /> Use my picture
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = '';
+                  if (file) applyWallpaperImage(file);
+                }}
+              />
+            </label>
+            {wallpaperImage && (
+              <button onClick={clearWallpaperImage} aria-label="Remove wallpaper picture" className="h-10 w-10 flex items-center justify-center rounded-xl border border-line text-ink-soft hover:border-wine/40">
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </Section>
 

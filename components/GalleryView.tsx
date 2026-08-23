@@ -18,8 +18,7 @@ export default function GalleryView({
   groupByMonth?: boolean;
   albums?: Album[];
   collections?: Collection[];
-  /** if provided, an item is removed from this view once it no longer satisfies this predicate */
-  removeWhen?: (m: Media) => boolean;
+  removeWhen?: 'favorite' | 'archived';
 }) {
   const [items, setItems] = useState(initialItems);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
@@ -34,7 +33,9 @@ export default function GalleryView({
 
   function handleChanged(updated: Media) {
     setItems((prev) => {
-      const shouldRemove = removeWhen?.(updated);
+      const shouldRemove = removeWhen === 'favorite'
+        ? !updated.is_favorite || updated.is_deleted
+        : removeWhen === 'archived' && (!updated.is_archived || updated.is_deleted);
       const next = shouldRemove ? prev.filter((m) => m.id !== updated.id) : prev.map((m) => (m.id === updated.id ? updated : m));
       return next;
     });

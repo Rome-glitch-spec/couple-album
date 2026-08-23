@@ -138,7 +138,19 @@ insert into public.reminders (reminder_type) select 'monthsary'
   where not exists (select 1 from public.reminders where reminder_type = 'monthsary');
 
 -- ---------------------------------------------------------------------------
--- 7. updated_at trigger helper
+-- 7. chat_messages
+-- ---------------------------------------------------------------------------
+create table if not exists public.chat_messages (
+  id uuid primary key default gen_random_uuid(),
+  sender_id uuid not null references public.profiles(id) on delete cascade,
+  body text not null check (char_length(trim(body)) between 1 and 2000),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists chat_messages_created_at_idx on public.chat_messages (created_at);
+
+-- ---------------------------------------------------------------------------
+-- 8. updated_at trigger helper
 -- ---------------------------------------------------------------------------
 create or replace function public.set_updated_at()
 returns trigger language plpgsql as $$
@@ -208,6 +220,7 @@ alter table public.collection_media enable row level security;
 alter table public.collages enable row level security;
 alter table public.reminders enable row level security;
 alter table public.app_settings enable row level security;
+alter table public.chat_messages enable row level security;
 
 -- profiles: any authorized partner can see both profiles (needed to show
 -- "who uploaded this"); a user may only update their own row.
@@ -270,6 +283,20 @@ create policy "reminders_update" on public.reminders for update using (public.is
 
 create policy "app_settings_select" on public.app_settings for select using (public.is_authorized_partner());
 create policy "app_settings_update" on public.app_settings for update using (public.is_authorized_partner());
+
+-- chat: both authorized partners share one private conversation
+create policy "chat_messages_select" on public.chat_messages for select using (public.is_authorized_partner());
+create policy "chat_messages_insert" on public.chat_messages for insert with check (public.is_authorized_partner() and sender_id = auth.uid());
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'chat_messages'
+  ) then
+    alter publication supabase_realtime add table public.chat_messages;
+  end if;
+end $$;
 
 -- ============================================================================
 -- STORAGE — private bucket + policies

@@ -3,9 +3,9 @@ import PageHeader from '@/components/PageHeader';
 import MonthsaryBanner from '@/components/MonthsaryBanner';
 import GalleryView from '@/components/GalleryView';
 import EmptyState from '@/components/EmptyState';
+import MonthsaryCountdown from '@/components/MonthsaryCountdown';
 import Link from 'next/link';
-import { GalleryVertical, Heart, FolderHeart, CalendarHeart, Sparkles } from 'lucide-react';
-import { daysUntilNextMonthsary } from '@/lib/utils';
+import { GalleryVertical, Heart, FolderHeart, CalendarHeart } from 'lucide-react';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -22,9 +22,12 @@ export default async function DashboardPage() {
   ]);
 
   const firstName = profile?.display_name?.split(' ')[0] || 'there';
-  const hour = new Date().getHours();
+  const hour = Number(new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Manila',
+    hour: '2-digit',
+    hourCycle: 'h23',
+  }).format(new Date()));
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-  const daysUntil = reminder ? daysUntilNextMonthsary(reminder.reminder_day) : null;
 
   return (
     <div>
@@ -32,12 +35,7 @@ export default async function DashboardPage() {
       <MonthsaryBanner settings={settings ?? null} reminder={reminder ?? null} />
 
       <div className="px-4 sm:px-8 py-6 space-y-10">
-        {daysUntil !== null && daysUntil > 0 && (
-          <div className="flex items-center gap-2 text-sm text-ink-soft">
-            <Sparkles className="h-4 w-4 text-gold" />
-            {daysUntil === 1 ? 'Monthsary is tomorrow 💛' : `${daysUntil} days until your next monthsary`}
-          </div>
-        )}
+        {reminder?.enabled && <MonthsaryCountdown day={reminder.reminder_day} />}
 
         <section>
           <SectionHeader icon={GalleryVertical} title="Recent memories" href="/memories" />

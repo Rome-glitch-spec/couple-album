@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Home, GalleryVertical, FolderHeart, Heart, Plus, Menu, X, Layers, Archive, Trash2, Wand2, Settings, LogOut } from 'lucide-react';
+import { Home, GalleryVertical, FolderHeart, Heart, Plus, Menu, X, Layers, Archive, Trash2, Wand2, Settings, LogOut, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -19,6 +19,7 @@ const SECONDARY_MENU = [
   { href: '/trash', label: 'Trash', icon: Trash2 },
   { href: '/collage', label: 'Collage Maker', icon: Wand2 },
   { href: '/settings', label: 'Settings', icon: Settings },
+  { href: '/chat', label: 'Chat', icon: MessageCircle },
 ];
 
 export default function MobileNav({ onAdd }: { onAdd: () => void }) {

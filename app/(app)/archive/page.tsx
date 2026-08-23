@@ -17,7 +17,7 @@ export default async function ArchivePage() {
       <PageHeader title="Archived" subtitle="Tucked away, but never lost." showAdd={false} />
       <div className="px-4 sm:px-8 py-6">
         {items && items.length > 0 ? (
-          <GalleryView initialItems={items} albums={albums ?? []} collections={collections ?? []} removeWhen={(m) => !m.is_archived || m.is_deleted} />
+          <GalleryView initialItems={items} albums={albums ?? []} collections={collections ?? []} removeWhen="archived" />
         ) : (
           <EmptyState icon={Archive} title="Nothing archived" subtitle="Archived photos and videos will show up here, out of your main gallery but always safe." />
         )}

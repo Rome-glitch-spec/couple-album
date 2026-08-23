@@ -17,6 +17,7 @@
   --gold: #b8863f;
   --gold-soft: #e8d3a9;
   --sage: #6f7d5e;
+  --wallpaper-image: radial-gradient(circle at 15% 10%, color-mix(in srgb, var(--gold-soft) 35%, transparent), transparent 32%), radial-gradient(circle at 85% 90%, color-mix(in srgb, var(--wine) 8%, transparent), transparent 30%);
 
   --background: var(--paper);
   --foreground: var(--ink);
@@ -33,6 +34,7 @@
   --gold: #dcb579;
   --gold-soft: #4a3a26;
   --sage: #9fae8c;
+  --wallpaper-image: radial-gradient(circle at 15% 10%, color-mix(in srgb, var(--gold-soft) 22%, transparent), transparent 32%), radial-gradient(circle at 85% 90%, color-mix(in srgb, var(--wine) 14%, transparent), transparent 30%);
 
   --background: var(--paper);
   --foreground: var(--ink);
@@ -58,6 +60,24 @@
 body {
   background: var(--paper);
   color: var(--ink);
+}
+
+.app-wallpaper {
+  background-color: var(--paper);
+  background-image: var(--wallpaper-image);
+}
+
+html[data-wallpaper='linen'] {
+  --wallpaper-image: repeating-linear-gradient(0deg, color-mix(in srgb, var(--ink) 2%, transparent) 0 1px, transparent 1px 5px), repeating-linear-gradient(90deg, color-mix(in srgb, var(--ink) 1.5%, transparent) 0 1px, transparent 1px 7px);
+}
+
+html[data-wallpaper='petals'] {
+  --wallpaper-image: radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--wine) 10%, transparent) 0 2px, transparent 3px), radial-gradient(circle at 82% 72%, color-mix(in srgb, var(--gold) 14%, transparent) 0 3px, transparent 4px), radial-gradient(circle at 55% 35%, color-mix(in srgb, var(--wine) 6%, transparent) 0 1px, transparent 2px);
+  background-size: 86px 86px, 120px 120px, 64px 64px;
+}
+
+html[data-wallpaper='plain'] {
+  --wallpaper-image: none;
 }
 
 ::selection {

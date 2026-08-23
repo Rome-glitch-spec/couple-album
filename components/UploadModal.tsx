@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { X, UploadCloud, Film, AlertCircle, CheckCircle2, RotateCcw } from 'lucide-react';
 import { uploadMedia } from '@/lib/media-service';
 import { validateFile, formatBytes, cn } from '@/lib/utils';
@@ -18,11 +18,13 @@ interface QueueItem {
 export default function UploadModal({
   albums,
   collections,
+  initialFiles = [],
   onClose,
   onUploaded,
 }: {
   albums: Album[];
   collections: Collection[];
+  initialFiles?: File[];
   onClose: () => void;
   onUploaded: (media: Media[]) => void;
 }) {
@@ -34,6 +36,7 @@ export default function UploadModal({
   const [preparing, setPreparing] = useState(false);
   const [prepareError, setPrepareError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const initialFilesAdded = useRef(false);
 
   const addFiles = useCallback(async (files: FileList | File[]) => {
     if (files.length === 0) return;
@@ -65,6 +68,13 @@ export default function UploadModal({
       setPreparing(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (initialFiles.length > 0 && !initialFilesAdded.current) {
+      initialFilesAdded.current = true;
+      void addFiles(initialFiles);
+    }
+  }, [addFiles, initialFiles]);
 
   function updateItem(idx: number, patch: Partial<QueueItem>) {
     setQueue((q) => q.map((it, i) => (i === idx ? { ...it, ...patch } : it)));
